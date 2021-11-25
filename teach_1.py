@@ -10,6 +10,7 @@
 
 a = 10
 b = 5
+
 if a > b : print("A bigger then B")
 
 #-------------------------------------------
@@ -37,12 +38,14 @@ elif num % 2 != 0:
 #   ถ้าความเร็วระหว่าง 45->90 ให้แสดงผลเป็น medium speed ! 
 #   ถ้าความเร็วต่ำกว่า 45 ให้แสดงผลเป็น slow speed ! 
 #-------------------------------------------#
-
+#   &&  ||  !=
+#   and or not
+#   if speed > 90 and speed < 45 :
 
 
 # nest if
 #-------------------------------------------#
-grade = float(input("Enter you grade : "))
+grade = int(input("Enter you grade : "))
 if grade < 50 :
     print("F")
 elif grade >= 50 and grade < 55 :
@@ -65,21 +68,26 @@ elif grade > 100:
 
 
 #-------------------------------------------#
-id_card = input("Have id card ? :")
-age = int(input("Enter your age : "))
+
+
+id_card = input("Have id card [Y:N] ? :").lower()
 
 if id_card == 'Y' or id_card == 'y':
-    if age > 18 :
+    age = int(input("Enter your age : "))
+    if age >= 18 :
         print("Welcome to pub!")
     else:
         print('Sorry you are under 18')
 else:
     print("Pls bring id card with you next time !")
+
+
+
+
 #-------------------------------------------#
 
 # -------------------------------------------------------------------------
 # list เป็นโครงสร้างฐานข้อมูล คล้ายกับ Array เเต่ว่าสามารถชนิดข้อมูลต่างกันได้
-# 
 # -------------------------------------------------------------------------
 
 mylist = ["Apple","Orange","Watermelon"]
@@ -105,7 +113,7 @@ print(f'Jerry like {mylist[2]}')
 # -------------------------------------------------------------------------
 
 # วิธีเพิ่มข้อมูลลงใน list จะมีคำสั่ง extend, append, insert, +
-# extend จะเพิ่ม List เข้าไปมน List mylist1.extend(mylist2)
+# extend จะเพิ่ม List เข้าไป List mylist1.extend(mylist2)
 # append จะเพิ่มข้อมูลเข้า list ในตำแหน่งสุดท้าย mylist.append("Rose")
 # insert จะเพิ่มข้อมูลเข้า list โดยอ้างอิงจากตำแหน่ง mylist.insert(0, "Jackson")
 # -------------------------------------------------------------------------
@@ -142,7 +150,6 @@ this_list = [120,55,90,12,25]
 that_list = [99,98,88,200,1000]
 
 this_list.sort()
-
 that_list.sort( reverse= True)
 
 # -------------------------------------------------------------------------
