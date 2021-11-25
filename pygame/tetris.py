@@ -160,18 +160,20 @@ def convert_shape(shape):
 
     #
     #
-    #
+    # หาเลข 0
 
 
     positions = []
     format = shape.shape[shape.rotation % len(shape.shape)]
 
     for i, line in enumerate(format):
-        row = list(line)
+        row = list(line) # ['.','.','0','.','.']
         for j, column in enumerate(row):
-            if column == '0':
+            if column == '0': # หาเลข 0
                 positions.append((shape.x + j, shape.y + i))
 
+
+    # ขยับรูปร่าง
     for i, pos in enumerate(positions):
         positions[i] = (pos[0] - 2, pos[1] - 4)
 
@@ -184,10 +186,14 @@ def get_shape():
 
 
 def next_shape(shape, game_window):
+
+    # เหมือน covert shape แต่จะวาวดรูปร่างแทน
+
     font = pygame.font.SysFont('itim', 30)
     next_shape_label = font.render('Next Shape', 1,(white))
     word_x = x_margin + play_width + 50
     word_y = top_margin + play_height/2 - 180
+
     format = shape.shape[shape.rotation % len(shape.shape)]
     for y, line in enumerate(format):
         row = list(line)
@@ -197,14 +203,13 @@ def next_shape(shape, game_window):
 
     game_window.blit(next_shape_label, (word_x + 10, word_y - 30))
 
-#
-# เข็ค
-#
-#
+# เข็คว่าตำแหน่งรูปร่างที่จะตกไปนั้นว่างหรือไม่
+# ส่งค่า grid และ shape
+# สร้าง List ขึ้นมาและเเช็คว่า ตำแหน่งนั้นมีสีหรือไม่
 #
 
-def valid_space(shape, grid):
-    accept_pos = [[(y, x) for y in range(10) if grid[x][y] == (0, 0, 0)] for x in range(20)]
+def empty_space(shape, grid):
+    accept_pos = [[(j, i) for j in range(10) if grid[i][j] == (0, 0, 0)] for i in range(20)]
     accept_pos = [j for sub in accept_pos for j in sub]
     format = convert_shape(shape)
     for pos in format:
@@ -213,13 +218,11 @@ def valid_space(shape, grid):
                 return False
     return True
 
-class play_zone(object):
-
+class play_zone():
 
     # สร้างตาราง x = 10 , y 20 และเก็บค่าสีเเข้าใน list
     # lock_position เป็น Dictionary ใช้เก็บค่าสีโดยอ้างอิง จากตำแหน่งใน Grid
     # sample data in Dictionary = ((x,y):(tomato))
-
     def create_grid(lock_position={}):
         grid = [[(0,0,0) for __ in range(10)]for __ in range(20)]
         for x in range(len(grid)):
@@ -291,9 +294,8 @@ class play_zone(object):
         pygame.draw.rect(game_window, (red), (x_margin, top_margin, play_width-50, play_height - 50), 5)
 
 
-    #
     # เช็คตำแหน่ง (x,y) ใน Dictionary ว่า y น้อยกว่า 1 หรือไม่
-    #
+
     def check_conner(lock_pos):
         for pos in lock_pos:
             x, y = pos
@@ -303,10 +305,10 @@ class play_zone(object):
         return False
 
 
-
+    # เช็คแถวว่าเต็มไหมหลักการเช็คคือจะเช็คสีใน grid หากมีสีอื่นที่ไม่ใช่สีดำจะลบค่า Lock_position
 
     def check_tetris(grid, lock_pos):
-        global index
+        index = 0
         increases = 0
         for i in range(len(grid) - 1, -1, -1):
             row = grid[i]
@@ -318,7 +320,9 @@ class play_zone(object):
 
         if increases > 0:
             for key in sorted(list(lock_pos), key = lambda x: x[1])[::-1]:
+                # sample data [(0,1),(0,0)]
                 x, y = key
+                # เช็คว่า y อยู่สูงกว่าแถวที่เรานำออกไป
                 if y < index:
                     newKey = (x, y + increases)
                     mixer.Sound.play(clear_row_sound)
@@ -327,14 +331,14 @@ class play_zone(object):
         return increases
 
 #score
-
 def update_score(score):
     high_score = get_high_score()
-    with open('scores.txt','w') as f:
-        if int(high_score) > score:
-            f.write(str(high_score))
-        else:
-            f.write(str(score))
+    if os.path.exists('scores.txt'):
+        with open('scores.txt','w') as f:
+            if int(high_score) > score:
+                f.write(str(high_score))
+            else:
+                f.write(str(score))
 
 def get_high_score():
     if os.path.exists('scores.txt'):
@@ -347,33 +351,32 @@ def main_game():
 
     run = True
     lock_position = {}
-    change_piece = False
 
-    current_piece = get_shape()
-    next_piece = get_shape()
+    change_piece = False #เช็คว่าต้องเปลี่ยนรูปร่างไหม
+    current_piece = get_shape() #รูปร่างปัจจุบัน
+    next_piece = get_shape() #รูปร่างต่อไปที่จะตก
 
     clock = pygame.time.Clock()
-    fall_time = 0
-    fall_speed = 0.30
+    fall_time = 0   #เก็บค่า loop ว่ารันไปแล้วกี่ครั้ง
+    fall_speed = 0.30 #ความเร็วของรูปร่างที่จะตกลงมา
+
+    #set up score
     level = 0
     high_score = get_high_score()
     score = 0
 
-    mixer.music.play(-1)
+    #mixer.music.play(-1)
 
     #game running
     while run:
 
 
         grid = play_zone.create_grid(lock_position)
-        fall_time += clock.get_rawtime()
+        fall_time += clock.get_rawtime() #จะเช็คว่า while lopp ทำงานนานเท่าไหร่
         clock.tick()
 
-
-
-
         #game control
-        pressed = lambda key: event.type == pygame.KEYDOWN and event.key == key
+        pressed = lambda key: event.type == pygame.KEYDOWN and event.key == key #สร้าง function มาเก็บค่าเวลากด คีบอร์ดไว้
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -386,19 +389,19 @@ def main_game():
                 game_over()
             elif pressed(pygame.K_LEFT):
                 current_piece.x -= 1
-                if not(valid_space(current_piece, grid)):
+                if not(empty_space(current_piece, grid)):
                     current_piece.x += 1
             elif pressed(pygame.K_RIGHT):
                 current_piece.x += 1
-                if not (valid_space(current_piece, grid)):
+                if not (empty_space(current_piece, grid)):
                     current_piece.x -= 1
             elif pressed(pygame.K_DOWN):
                 current_piece.y += 1
-                if not(valid_space(current_piece, grid)):
+                if not(empty_space(current_piece, grid)):
                     current_piece.y -= 1
             elif pressed(pygame.K_UP):
                 current_piece.rotation += 1
-                if not (valid_space(current_piece, grid)):
+                if not (empty_space(current_piece, grid)):
                     current_piece.rotation -= 1
 
 
@@ -423,7 +426,7 @@ def main_game():
         if fall_time / 1000 >= fall_speed:
                 fall_time = 0
                 current_piece.y += 1
-                if not (valid_space(current_piece, grid)) and current_piece.y > 0:
+                if not (empty_space(current_piece, grid)) and current_piece.y > 0:
                     current_piece.y -= 1
                     change_piece = True
 
